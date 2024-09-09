@@ -112,7 +112,7 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 		}
 	}
 
-	log.Info("Created snapshot", "clusters", len(cluster), "listeners", len(listener))
+	log.Info("Created snapshot", "clusters", len(cluster), "listeners", len(listener), "loadbalancers", len(loadBalancers))
 
 	for _, route := range routes {
 		if route.Spec.Source.Kubernetes == nil {
