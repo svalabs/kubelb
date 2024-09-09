@@ -61,7 +61,7 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 		// multiple endpoints represent multiple clusters
 		log.V(2).Info("Adding load balancer", "name", lb.Name, "namespace", lb.Namespace)
 		for i, lbEndpoint := range lb.Spec.Endpoints {
-			log.V(2).Info("Adding endpoint", "name", lbEndpoint.Name, "namespace", lbEndpoint.Namespace)
+			log.V(2).Info("Adding endpoint", "name", lbEndpoint.AddressesReference.Name)
 			if lbEndpoint.AddressesReference != nil {
 				// Check if map already contains the key
 				if val, ok := addressesMap[fmt.Sprintf(endpointAddressReferencePattern, lb.Namespace, lbEndpoint.AddressesReference.Name)]; ok {
@@ -80,7 +80,7 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 			}
 
 			for _, lbEndpointPort := range lbEndpoint.Ports {
-				log.V(2).Info("Adding port", "name", lbEndpointPort.Name, "namespace", lbEndpointPort.Namespace)
+				log.V(2).Info("Adding port", "port", lbEndpointPort.Port, "protocol", lbEndpointPort.Protocol)
 				var lbEndpoints []*envoyEndpoint.LbEndpoint
 				key := fmt.Sprintf(kubelb.EnvoyResourceIdentifierPattern, lb.Namespace, lb.Name, i, lbEndpointPort.Port, lbEndpointPort.Protocol)
 
