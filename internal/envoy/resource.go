@@ -55,11 +55,13 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 	var listener []types.Resource
 	var cluster []types.Resource
 	
-        log := ctrl.LoggerFrom(ctx)
+    log := ctrl.LoggerFrom(ctx)
 	addressesMap := make(map[string][]kubelbv1alpha1.EndpointAddress)
 	for _, lb := range loadBalancers {
 		// multiple endpoints represent multiple clusters
+		log.V(2).Info("Adding load balancer", "name", lb.Name, "namespace", lb.Namespace)
 		for i, lbEndpoint := range lb.Spec.Endpoints {
+			log.V(2).Info("Adding endpoint", "name", lbEndpoint.Name, "namespace", lbEndpoint.Namespace)
 			if lbEndpoint.AddressesReference != nil {
 				// Check if map already contains the key
 				if val, ok := addressesMap[fmt.Sprintf(endpointAddressReferencePattern, lb.Namespace, lbEndpoint.AddressesReference.Name)]; ok {
@@ -78,6 +80,7 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 			}
 
 			for _, lbEndpointPort := range lbEndpoint.Ports {
+				log.V(2).Info("Adding port", "name", lbEndpointPort.Name, "namespace", lbEndpointPort.Namespace)
 				var lbEndpoints []*envoyEndpoint.LbEndpoint
 				key := fmt.Sprintf(kubelb.EnvoyResourceIdentifierPattern, lb.Namespace, lb.Name, i, lbEndpointPort.Port, lbEndpointPort.Protocol)
 
@@ -103,6 +106,8 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 				log.V(2).Info("adding cluster", "key", key, "ports", len(lbEndpoint.Ports))
 				cluster = append(cluster, makeCluster(key, lbEndpoints))
 			}
+
+			
 		}
 	}
 
