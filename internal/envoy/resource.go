@@ -60,7 +60,7 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 	addressesMap := make(map[string][]kubelbv1alpha1.EndpointAddress)
 	for _, lb := range loadBalancers {
 		// multiple endpoints represent multiple clusters
-		// log.Info("Adding load balancer", "name", lb.Name, "namespace", lb.Namespace)
+		log.Info("Adding load balancer", "name", lb.Name, "namespace", lb.Namespace)
 		for i, lbEndpoint := range lb.Spec.Endpoints {
 			// log.Info("Adding endpoint", "name", lbEndpoint.AddressesReference.Name)
 			if lbEndpoint.AddressesReference != nil {
