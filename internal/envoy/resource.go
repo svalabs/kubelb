@@ -65,7 +65,7 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 			// log.Info("Adding endpoint", "name", lbEndpoint.AddressesReference.Name)
 			if lbEndpoint.AddressesReference != nil {
 				// Check if map already contains the key
-				if val, ok := addressesMap[fmt.Sprintf(endpointAddressReferencePattern, lb.Namespace, lbEndpoint.AddressesReference.Name)]; ok {
+				if val, ok := addressesMap[fmt.Sprintf(endpointAddressReferencePattern, lb.Namespace, lbEndpoint.AddressesReference.Name)]; ok && len(lbs) == 1 {
 					lb.Spec.Endpoints[i].Addresses = val
 					//continue
 				} else {
