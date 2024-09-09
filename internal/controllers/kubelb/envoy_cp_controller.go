@@ -155,7 +155,7 @@ func (r *EnvoyCPReconciler) ListLoadBalancersAndRoutes(ctx context.Context, req 
 	loadBalancers := kubelbv1alpha1.LoadBalancerList{}
 	routes := kubelbv1alpha1.RouteList{}
 	var err error
-
+    log := ctrl.LoggerFrom(ctx)
 	switch r.EnvoyProxyTopology {
 	case EnvoyProxyTopologyShared, EnvoyProxyTopologyDedicated:
 		err = r.List(ctx, &loadBalancers, client.InNamespace(req.Namespace))
