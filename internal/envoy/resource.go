@@ -104,13 +104,15 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 				} else if lbEndpointPort.Protocol == corev1.ProtocolUDP {
 					listener = append(listener, makeUDPListener(key, key, port))
 				}
-				log.Info("adding cluster", "key", key, "ports", len(lbEndpoint.Ports))
+				log.Info("adding cluster", "port", lbEndpointPort.Port, "protocol", lbEndpointPort.Protocol)
 				cluster = append(cluster, makeCluster(key, lbEndpoints))
 			}
 
 			
 		}
 	}
+
+	log.Info("Created snapshot", "clusters", len(cluster), "listeners", len(listener))
 
 	for _, route := range routes {
 		if route.Spec.Source.Kubernetes == nil {
