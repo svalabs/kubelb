@@ -38,7 +38,7 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
-        ctrl "sigs.k8s.io/controller-runtime"
+
 	kubelbv1alpha1 "k8c.io/kubelb/api/kubelb.k8c.io/v1alpha1"
 	"k8c.io/kubelb/internal/kubelb"
 	portlookup "k8c.io/kubelb/internal/port-lookup"
@@ -54,20 +54,15 @@ const (
 func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []kubelbv1alpha1.LoadBalancer, routes []kubelbv1alpha1.Route, portAllocator *portlookup.PortAllocator, globalEnvoyProxyTopology bool) (*envoycache.Snapshot, error) {
 	var listener []types.Resource
 	var cluster []types.Resource
-	
-    log := ctrl.LoggerFrom(ctx)
-	// log.Info("Creating snapshot")
+
 	addressesMap := make(map[string][]kubelbv1alpha1.EndpointAddress)
 	for _, lb := range loadBalancers {
 		// multiple endpoints represent multiple clusters
-		log.Info("Adding load balancer", "name", lb.Name, "namespace", lb.Namespace)
 		for i, lbEndpoint := range lb.Spec.Endpoints {
-			// log.Info("Adding endpoint", "name", lbEndpoint.AddressesReference.Name)
 			if lbEndpoint.AddressesReference != nil {
 				// Check if map already contains the key
 				if val, ok := addressesMap[fmt.Sprintf(endpointAddressReferencePattern, lb.Namespace, lbEndpoint.AddressesReference.Name)]; ok && len(loadBalancers) == 1 {
 					lb.Spec.Endpoints[i].Addresses = val
-					//continue
 				} else {
 					// Load addresses from reference
 					var addresses kubelbv1alpha1.Addresses
@@ -81,7 +76,6 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 			}
 
 			for _, lbEndpointPort := range lbEndpoint.Ports {
-				// log.Info("Adding port", "port", lbEndpointPort.Port, "protocol", lbEndpointPort.Protocol)
 				var lbEndpoints []*envoyEndpoint.LbEndpoint
 				key := fmt.Sprintf(kubelb.EnvoyResourceIdentifierPattern, lb.Namespace, lb.Name, i, lbEndpointPort.Port, lbEndpointPort.Protocol)
 
@@ -104,15 +98,10 @@ func MapSnapshot(ctx context.Context, client ctrlclient.Client, loadBalancers []
 				} else if lbEndpointPort.Protocol == corev1.ProtocolUDP {
 					listener = append(listener, makeUDPListener(key, key, port))
 				}
-				log.Info("adding cluster", "port", lbEndpointPort.Port, "protocol", lbEndpointPort.Protocol)
 				cluster = append(cluster, makeCluster(key, lbEndpoints))
 			}
-
-			
 		}
 	}
-
-	log.Info("Created snapshot", "clusters", len(cluster), "listeners", len(listener), "loadbalancers", len(loadBalancers))
 
 	for _, route := range routes {
 		if route.Spec.Source.Kubernetes == nil {
